@@ -5,6 +5,8 @@ using CSV
 using WordTokenizers
 using Random
 
+vecAvgs = Dict()
+
 function activation(Weighted_Inputs,bias)
     active_inputs = []
     for x in Weighted_Inputs
@@ -82,6 +84,18 @@ function generate_first_input_weights(numputs)
     return input_weights
 end
 
+function get_training_data(fileName)
+    v = Dict()
+    f = open(fileName,"r")
+    contents = readLines(f)
+    le = Int(round((length(contents)/2)+1))
+    for x in 1:le:2
+        ff = parse(Float64, contents[x+1])
+        v[contents[x]] = ff
+    end
+    return v
+end
+
 function hidden_layer(input,weights,learningRate, iterations, bias, expectation)
     W = weights
     er = 0
@@ -104,7 +118,6 @@ function hidden_layer(input,weights,learningRate, iterations, bias, expectation)
         println("Predicted ",output, " with error rate",er)
         W = update_weights(W,learningRate,realerror)
     end
-
 end
 
 function multiply_arrays(A,B)
@@ -121,6 +134,49 @@ function multiply_arrays(A,B)
         end
     end
     return C
+end
+function tt()
+    csv_reader = CSV.File("dataset.csv")
+    # f = open("usedvectors.txt","w")
+    count = 1
+    println(csv_reader[2].Title)
+end
+tt();
+function obtain_vectors()
+    csv_reader = CSV.File("dataset.csv")
+    # f = open("usedvectors.txt","w")
+    count = 1
+    for row in csv_reader
+        println("Row ",count)
+        s = row.Text
+        tr = split(s)
+        input = []
+        for t in tr
+            g = 0
+            try
+                i = vecAvgs[t]
+                g = average(i)
+            catch
+                i = wtvt(t)
+                g = average(i)
+                vecAvgs[string(t)] = g
+            end
+            append!(input,t)
+            g1 = string(g)
+            # write(f,g1)
+            # write(f,"\n")
+        end
+        count+=1
+    end
+    K = keys(vecAvgs)
+    for k in K
+        f = open("usedvectors.txt","w")
+        write(f,k)
+        write(f,"\n")
+        write(f,vecAvgs[k])
+        write(f,"\n")
+        f.close()
+    end
 end
 
 function random_float()
@@ -150,12 +206,11 @@ end
 
 function train(learningRate, epochs, bias)
     x=1
-    csv_reader = CSV.File("dataset.csv")
+    vecAvgs = get_training_data("usedvectors.txt")
     rows = csv_reader.rows
     columns = csv_reader.columns
-    vecAvgs = Dict{string,float}
     weights = []
-    for row in csv_reader
+    for row in csv_reader 
         expected_output = []
         value = row.ScienceFiction
         append!(expected_output,value)
@@ -228,35 +283,8 @@ bias = .88
 #Use the weights for further analysis
 # print("hello world")
 
-function obtain_vectors()
-    csv_reader = CSV.File("dataset.csv")
-    vecAvgs = Dict()
-    f = open("usedvectors.txt","w")
-    count = 1
-    for row in csv_reader
-        println("Row ",count)
-        s = row.Text
-        tr = split(s)
-        input = []
-        for t in tr
-            g = 0
-            write(f,t)
-            write(f,"\n")
-            try
-                i = vecAvgs[t]
-                g = average(i)
-            catch
-                i = wtvt(t)
-                g = average(i)
-                vecAvgs[string(t)] = g
-            end
-            append!(input,t)
-            g1 = string(g)
-            write(f,g1)
-            write(f,"\n")
-        end
-        count+=1
-    end
-    f.close()
-end
-obtain_vectors();
+
+# obtain_vectors();
+# Weighted = [-0.55,0.7,0.05,-0.03,0.9,0.45,-0.001]
+# A = activation(Weighted,1)
+# println(A)
