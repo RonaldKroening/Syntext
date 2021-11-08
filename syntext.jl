@@ -278,13 +278,4 @@ end
 learningRate = .6
 epochs = 10
 bias = .88
-# weights = train(learningRate,epochs,bias);
-# print("hi")
-#Use the weights for further analysis
-# print("hello world")
-
-
-# obtain_vectors();
-# Weighted = [-0.55,0.7,0.05,-0.03,0.9,0.45,-0.001]
-# A = activation(Weighted,1)
-# println(A)
+weights = train(learningRate,epochs,bias);
