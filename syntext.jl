@@ -206,10 +206,10 @@ end
 
 function train(learningRate, epochs, bias)
     x=1
-    vecAvgs = get_training_data("usedvectors.txt")
     rows = csv_reader.rows
     columns = csv_reader.columns
     weights = []
+    vecAvgs = Dict()
     for row in csv_reader 
         expected_output = []
         value = row.ScienceFiction
@@ -225,20 +225,22 @@ function train(learningRate, epochs, bias)
         s = row.Text
         tr = split(s)
         input = []
+        count = 0
         for t in tr
+            println("On word ",count)
+            g = 0
             try
-                i = vecAvgs[t]
-                g = average(i)
-                if(g != 0.0)
-                    append!(input, g)
-                end
+              g = vecAvgs[t]
             catch
-                i = wtvt(t)
-                g = average(i)
-                if(g != 0.0)
-                    append!(input, g)
-                end
+              g = average(wtvt(t))
+              vecAvgs[t] = g
             end
+            i = wtvt(t)
+            g = average(i)
+            if(g != 0.0)
+                append!(input, g)
+            end
+            count+=1
         end
         println("Expected ",expected_output);
         weights = generate_first_input_weights()
